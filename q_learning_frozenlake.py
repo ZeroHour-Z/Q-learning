@@ -1,11 +1,7 @@
-"""
-基于随机滑动 FrozenLake 的 Q-learning 求解实验
-比较 8x8 预设地图 与 自定义 12x12 地图的训练效果
-"""
-
 import numpy as np
 import gymnasium as gym
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 from matplotlib import rcParams
 import os
 
@@ -15,7 +11,6 @@ rcParams["axes.unicode_minus"] = False
 OUTPUT_DIR = "results"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# ==================== 自定义 12x12 地图 ====================
 CUSTOM_12x12_MAP = [
     "SFFFFFFFHFFF",
     "FFFFFFFFFFFF",
@@ -145,9 +140,7 @@ def moving_average(data, window=200):
     result[window:] = cumsum[window:] / window
     return result
 
-
-# ==================== 可视化 ====================
-
+# 可视化
 def plot_training_curves(rewards_8x8, rewards_12x12,
                          success_8x8, success_12x12, window=200):
     """绘制训练奖励曲线和成功率曲线"""
@@ -249,6 +242,118 @@ def plot_policy_grid(policy, nrow, ncol, map_desc, title, filename):
     print(f"[已保存] {OUTPUT_DIR}/{filename}")
 
 
+def create_agent_animation(agent, map_desc, nrow, ncol, title, filename,
+                           env_kwargs, max_attempts=50):
+    """生成智能体按贪婪策略行走的 GIF 动画"""
+    env = gym.make("FrozenLake-v1", **env_kwargs)
+
+    trajectory = None
+    for _ in range(max_attempts):
+        states = []
+        state, _ = env.reset()
+        states.append(state)
+        done = False
+        while not done:
+            action = int(np.argmax(agent.q_table[state]))
+            state, reward, terminated, truncated, _ = env.step(action)
+            states.append(state)
+            done = terminated or truncated
+        if reward > 0:
+            trajectory = states
+            break
+    env.close()
+
+    if trajectory is None:
+        print(f"[跳过] {filename} — 未能在 {max_attempts} 次尝试中找到成功轨迹")
+        return
+
+    arrow_dx = {0: -0.3, 1: 0, 2: 0.3, 3: 0}
+    arrow_dy = {0: 0, 1: 0.3, 2: 0, 3: -0.3}
+    policy = agent.get_greedy_policy()
+    cell_size = 0.85
+    fig, ax = plt.subplots(figsize=(max(ncol * cell_size, 5), max(nrow * cell_size, 5)))
+
+    def draw_base(ax):
+        ax.clear()
+        for r in range(nrow):
+            for c in range(ncol):
+                cell = map_desc[r][c]
+                if cell == "H":
+                    color = "#2c3e50"
+                elif cell == "G":
+                    color = "#27ae60"
+                elif cell == "S":
+                    color = "#3498db"
+                else:
+                    color = "#ecf0f1"
+                rect = plt.Rectangle((c, r), 1, 1, facecolor=color,
+                                     edgecolor="#7f8c8d", linewidth=1)
+                ax.add_patch(rect)
+
+                idx = r * ncol + c
+                if cell in ("H", "G"):
+                    ax.text(c + 0.5, r + 0.5, cell, ha="center", va="center",
+                            fontsize=12, fontweight="bold", color="white")
+                else:
+                    a = policy[idx]
+                    ax.annotate("", xy=(c + 0.5 + arrow_dx[a] * 0.6,
+                                        r + 0.5 + arrow_dy[a] * 0.6),
+                                xytext=(c + 0.5, r + 0.5),
+                                arrowprops=dict(arrowstyle="->", color="#bdc3c7",
+                                                lw=1.2))
+
+        ax.set_xlim(0, ncol)
+        ax.set_ylim(nrow, 0)
+        ax.set_aspect("equal")
+        ax.set_xticks(np.arange(ncol) + 0.5)
+        ax.set_xticklabels(range(ncol), fontsize=8)
+        ax.set_yticks(np.arange(nrow) + 0.5)
+        ax.set_yticklabels(range(nrow), fontsize=8)
+        ax.tick_params(length=0)
+
+    visited_patches = []
+    agent_marker = [None]
+
+    def update(frame):
+        for p in visited_patches:
+            p.remove()
+        visited_patches.clear()
+        if agent_marker[0] is not None:
+            agent_marker[0].remove()
+            agent_marker[0] = None
+
+        draw_base(ax)
+
+        for i in range(frame):
+            s = trajectory[i]
+            r, c = divmod(s, ncol)
+            cell = map_desc[r][c]
+            if cell not in ("H", "G"):
+                p = plt.Rectangle((c + 0.1, r + 0.1), 0.8, 0.8,
+                                  facecolor="#f39c12", alpha=0.25,
+                                  edgecolor="none")
+                ax.add_patch(p)
+                visited_patches.append(p)
+
+        s = trajectory[frame]
+        r, c = divmod(s, ncol)
+        marker = ax.plot(c + 0.5, r + 0.5, "o", markersize=max(18 - ncol, 10),
+                         color="#e74c3c", markeredgecolor="white",
+                         markeredgewidth=2, zorder=10)[0]
+        agent_marker[0] = marker
+
+        step_info = f"步骤 {frame}/{len(trajectory)-1}"
+        if frame == len(trajectory) - 1:
+            step_info += "  ★ 到达终点！"
+        ax.set_title(f"{title}\n{step_info}", fontsize=12, pad=8)
+
+    anim = animation.FuncAnimation(fig, update, frames=len(trajectory),
+                                   interval=400, repeat=True, repeat_delay=2000)
+    anim.save(os.path.join(OUTPUT_DIR, filename), writer="pillow", dpi=100)
+    plt.close(fig)
+    print(f"[已保存] {OUTPUT_DIR}/{filename}")
+
+
 # ==================== 主程序 ====================
 
 def run_experiment(map_name, desc, n_episodes, alpha, gamma,
@@ -321,6 +426,20 @@ def main():
     plot_training_curves(rewards_8, rewards_12, success_8, success_12)
     plot_policy_grid(policy_8, nr8, nc8, desc8, "8×8 最终策略", "policy_8x8.png")
     plot_policy_grid(policy_12, nr12, nc12, desc12, "12×12 最终策略", "policy_12x12.png")
+
+    # ---- 动态效果图 ----
+    print("\n正在生成动态效果图...")
+    create_agent_animation(
+        agent_8, desc8, nr8, nc8,
+        "8×8 智能体行走动画", "animation_8x8.gif",
+        env_kwargs={"map_name": "8x8", "is_slippery": True},
+    )
+    create_agent_animation(
+        agent_12, desc12, nr12, nc12,
+        "12×12 智能体行走动画", "animation_12x12.gif",
+        env_kwargs={"desc": CUSTOM_12x12_MAP, "is_slippery": True,
+                    "max_episode_steps": 500},
+    )
 
     # ---- 汇总比较 ----
     avg_r8, sr8, avg_s8 = test(

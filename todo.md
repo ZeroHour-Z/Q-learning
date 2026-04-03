@@ -5,9 +5,12 @@
 - 理解 Gymnasium 中 FrozenLake 环境的状态、动作、奖励与终⽌机制。
 - 掌握表格型 Q-learning 的基本实现⽅法。
 - 观察在随机滑动条件下，探索机制对学习效果的影响。
-- ⽐较在 88 预设地图 与 ⾃定义 1212 地图 上，Q-learning 的训练难度与最终表现差异。
-FrozenLake-v 1 是 Gymnasium Toy Text 中的经典离散环境，⽀持预设 4x4 、8x8 地图，也⽀持通过 is_slippery=True 时，动作具有随机性，不⼀定严格朝期望⽅向移动。
-使⽤ Gymnasium 预设地图：env = gym.make ("FrozenLake-v 1", map_name="8 x 8", is_slippery=True)
+- ⽐较在 8x8 预设地图 与 ⾃定义 12x12 地图 上，Q-learning 的训练难度与最终表现差异。
+FrozenLake-v 1 是 Gymnasium Toy Text 中的经典离散环境，⽀持预设 4x4 、8x8 地图，也⽀持通过desc参数传入自定义地图；当 is_slippery=True 时，动作具有随机性，不⼀定严格朝期望⽅向移动。
+使⽤ Gymnasium 预设地图：
+```python
+env = gym.make ("FrozenLake-v 1", map_name="8 x 8", is_slippery=True)
+```
 
 ## 实验要求 ：
 
@@ -19,7 +22,7 @@ FrozenLake-v 1 是 Gymnasium Toy Text 中的经典离散环境，⽀持预设 4x
 - 训练过程
 - 测试过程
 核⼼更新公式为：Q(s,a) ← Q(s,a) + α [R + γ max_a' Q(s',a') - Q(s,a)]
-FrozenLake 的 Gymnasium 官⽅教程就是使⽤表格型Q-learning 来求解该环境。也可以进⾏查阅
+FrozenLake 的 Gymnasium 官⽅教程就是使⽤表格型 Q-learning 来求解该环境。也可以进⾏查阅
 
 ### 2. 必须启⽤随机滑动
 两种环境都必须设置：
