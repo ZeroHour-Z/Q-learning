@@ -1,0 +1,4 @@
+gymnasium==1.2.3
+numpy==2.2.6
+matplotlib==3.10.8
+Pillow==12.2.0
