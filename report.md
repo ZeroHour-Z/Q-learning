@@ -342,7 +342,6 @@ def test(env, agent, n_episodes=1000):
 | 文件 | 说明 |
 |------|------|
 | `q_learning_frozenlake.py` | 完整实验代码（训练 + 测试 + 可视化 + 动画） |
-| `generate_animation.py` | 独立动画生成脚本 |
 | `results/training_curves.png` | 训练奖励曲线与成功率曲线对比图 |
 | `results/policy_8x8.png` | 8×8 最终策略网格图 |
 | `results/policy_12x12.png` | 12×12 最终策略网格图 |

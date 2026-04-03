@@ -1,12 +1,9 @@
 import os
-
 import gymnasium as gym
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import rcParams
-
-# ──────────────────────────── 全局配置 ────────────────────────────
 
 rcParams["font.sans-serif"] = ["SimHei", "Microsoft YaHei", "DejaVu Sans"]
 rcParams["axes.unicode_minus"] = False
@@ -14,15 +11,13 @@ rcParams["axes.unicode_minus"] = False
 OUTPUT_DIR = "results"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# 地图单元格颜色
 CELL_COLORS = {
-    "H": "#2c3e50",  # 冰洞：深色
-    "G": "#27ae60",  # 终点：绿色
-    "S": "#3498db",  # 起点：蓝色
-    "F": "#ecf0f1",  # 冰面：浅灰
+    "H": "#2c3e50", 
+    "G": "#27ae60", 
+    "S": "#3498db", 
+    "F": "#ecf0f1", 
 }
 
-# 自定义 12×12 地图
 CUSTOM_12x12_MAP = [
     "SFFFFFFFHFFF",
     "FFFFFFFFFFFF",
@@ -38,13 +33,10 @@ CUSTOM_12x12_MAP = [
     "FFFFFFFFFFFG",
 ]
 
-# 动作方向映射
 ACTION_SYMBOLS = {0: "←", 1: "↓", 2: "→", 3: "↑"}
 ARROW_DX = {0: -0.3, 1: 0.0, 2: 0.3, 3: 0.0}
 ARROW_DY = {0: 0.0, 1: 0.3, 2: 0.0, 3: -0.3}
 
-
-# ──────────────────────────── Q-learning 智能体 ────────────────────────────
 
 class QLearningAgent:
     """表格型 Q-learning 智能体"""
@@ -68,7 +60,6 @@ class QLearningAgent:
         return int(np.argmax(self.q_table[state]))
 
     def update(self, state, action, reward, next_state, done):
-        """Q(s,a) ← Q(s,a) + α [R + γ max_a' Q(s',a') − Q(s,a)]"""
         td_target = reward + self.gamma * np.max(self.q_table[next_state]) * (1 - done)
         td_error = td_target - self.q_table[state, action]
         self.q_table[state, action] += self.alpha * td_error
@@ -80,8 +71,6 @@ class QLearningAgent:
         """返回每个状态的贪婪动作"""
         return np.argmax(self.q_table, axis=1)
 
-
-# ──────────────────────────── 训练与测试 ────────────────────────────
 
 def train(env, agent, n_episodes, log_interval=2000):
     """训练智能体，返回各回合的奖励、步数、成功标记"""
@@ -139,10 +128,7 @@ def test(env, agent, n_episodes=1000):
     return np.mean(total_rewards), successes / n_episodes, np.mean(total_steps)
 
 
-# ──────────────────────────── 辅助工具 ────────────────────────────
-
 def moving_average(data, window=200):
-    """计算等宽滑动平均（前端使用累积均值填充）"""
     cumsum = np.cumsum(data)
     cumsum[window:] = cumsum[window:] - cumsum[:-window]
     result = np.empty_like(data, dtype=float)
@@ -154,8 +140,6 @@ def moving_average(data, window=200):
 def _cell_color(cell):
     return CELL_COLORS.get(cell, CELL_COLORS["F"])
 
-
-# ──────────────────────────── 可视化 ────────────────────────────
 
 def plot_training_curves(rewards_8x8, rewards_12x12,
                          success_8x8, success_12x12, window=200):
@@ -378,7 +362,6 @@ def run_experiment(map_name, desc, n_episodes, alpha, gamma,
 
 
 def main():
-    # ── 8×8 预设地图 ──────────────────────────────────────────────
     agent_8, r8, s8, sc8, pol8, nr8, nc8, desc8, kw8 = run_experiment(
         map_name="8x8", desc=None,
         n_episodes=50000,
@@ -387,7 +370,6 @@ def main():
         q_init=1.0,
     )
 
-    # ── 12×12 自定义地图 ──────────────────────────────────────────
     agent_12, r12, s12, sc12, pol12, nr12, nc12, desc12, kw12 = run_experiment(
         map_name="12x12 (自定义)", desc=CUSTOM_12x12_MAP,
         n_episodes=100000,
@@ -396,7 +378,6 @@ def main():
         q_init=1.0, max_episode_steps=500,
     )
 
-    # ── 可视化 ────────────────────────────────────────────────────
     print("\n正在生成可视化图表...")
     plot_training_curves(r8, r12, sc8, sc12)
     plot_policy_grid(pol8,  nr8,  nc8,  desc8,  "8×8 最终策略",  "policy_8x8.png")
@@ -408,7 +389,6 @@ def main():
     create_agent_animation(agent_12, desc12, nr12, nc12,
                            "12×12 智能体行走动画", "animation_12x12.gif", kw12)
 
-    # ── 汇总比较 ──────────────────────────────────────────────────
     avg_r8,  sr8,  avg_s8  = test(gym.make("FrozenLake-v1", **kw8),  agent_8)
     avg_r12, sr12, avg_s12 = test(gym.make("FrozenLake-v1", **kw12), agent_12)
 
