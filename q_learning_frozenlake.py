@@ -39,8 +39,6 @@ ARROW_DY = {0: 0.0, 1: 0.3, 2: 0.0, 3: -0.3}
 
 
 class QLearningAgent:
-    """表格型 Q-learning 智能体"""
-
     def __init__(self, n_states, n_actions, alpha=0.1, gamma=0.99,
                  epsilon=1.0, epsilon_min=0.01, epsilon_decay=0.9995,
                  q_init=0.0):
