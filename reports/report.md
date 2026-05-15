@@ -243,17 +243,17 @@ def test(env, agent, n_episodes=1000):
 
 下图展示了两种地图在训练过程中的平均奖励和成功率变化趋势（滑动窗口 = 200）：
 
-![训练曲线](results/training_curves.png)
+![训练曲线](../outputs/training_curves.png)
 
 ### 9.2 最终策略网格图
 
 **8×8 策略网格图**：
 
-![8×8 策略](results/policy_8x8.png)
+![8×8 策略](../outputs/policy_8x8.png)
 
 **12×12 策略网格图**：
 
-![12×12 策略](results/policy_12x12.png)
+![12×12 策略](../outputs/policy_12x12.png)
 
 ### 9.3 动态效果图
 
@@ -261,8 +261,8 @@ def test(env, agent, n_episodes=1000):
 
 **8×8 行走动画**：
 
-![8×8 动画](results/animation_8x8.gif)
+![8×8 动画](../outputs/animation_8x8.gif)
 
 **12×12 行走动画**：
 
-![12×12 动画](results/animation_12x12.gif)
+![12×12 动画](../outputs/animation_12x12.gif)

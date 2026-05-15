@@ -5,17 +5,18 @@
 ## 项目结构
 
 ```
-rl/
-├── q_learning_frozenlake.py   # 主脚本：训练、测试、可视化、动画
+Q-learning/
+├── src/                       # 训练、测试、可视化实现
+├── docs/                      # 实验要求
+├── reports/                   # 实验报告
+├── outputs/                   # 输出目录（运行后自动创建）
+│   ├── training_curves.png     # 训练奖励曲线与成功率曲线
+│   ├── policy_8x8.png          # 8×8 最终策略网格图
+│   ├── policy_12x12.png        # 12×12 最终策略网格图
+│   ├── animation_8x8.gif       # 8×8 智能体行走动画
+│   └── animation_12x12.gif     # 12×12 智能体行走动画
 ├── requirements.txt           # 依赖版本
-├── report.md                  # 实验报告
-├── todo.md                    # 实验要求
-└── results/                   # 输出目录（运行后自动创建）
-    ├── training_curves.png    # 训练奖励曲线与成功率曲线
-    ├── policy_8x8.png         # 8×8 最终策略网格图
-    ├── policy_12x12.png       # 12×12 最终策略网格图
-    ├── animation_8x8.gif      # 8×8 智能体行走动画
-    └── animation_12x12.gif    # 12×12 智能体行走动画
+└── README.md
 ```
 
 ## 环境配置
@@ -33,7 +34,7 @@ conda activate rl_course
 python q_learning_frozenlake.py
 ```
 
-运行完成后，所有图表和动画保存在 `results/` 目录。
+运行完成后，所有图表和动画保存在 `outputs/` 目录。
 
 > 完整训练（8×8 共 50,000 回合，12×12 共 100,000 回合）约需 3~5 分钟。
 
@@ -67,4 +68,4 @@ $$Q(s,a) \leftarrow Q(s,a) + \alpha \left[ R + \gamma \max_{a'} Q(s',a') - Q(s,a
 | 成功率 | ~57% | ~100% |
 | 平均步数 | ~76 | ~114 |
 
-详细分析见 [report.md](report.md)。
+详细分析见 [reports/report.md](reports/report.md)。

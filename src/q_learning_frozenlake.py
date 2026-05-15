@@ -1,4 +1,6 @@
 import os
+from pathlib import Path
+
 import gymnasium as gym
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
@@ -8,7 +10,8 @@ from matplotlib import rcParams
 rcParams["font.sans-serif"] = ["SimHei", "Microsoft YaHei", "DejaVu Sans"]
 rcParams["axes.unicode_minus"] = False
 
-OUTPUT_DIR = "results"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+OUTPUT_DIR = PROJECT_ROOT / "outputs"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 CELL_COLORS = {
@@ -399,7 +402,7 @@ def main():
     print(f"  {'成功率':<12} {sr8:>11.2%} {sr12:>11.2%}")
     print(f"  {'平均步数':<12} {avg_s8:>12.1f} {avg_s12:>12.1f}")
     print(f"{'='*60}")
-    print(f"\n所有结果已保存至 '{OUTPUT_DIR}/' 目录。")
+    print("\n所有结果已保存至 'outputs/' 目录。")
 
 
 if __name__ == "__main__":
